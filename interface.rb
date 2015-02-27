@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 require 'gtk2'
-require '/home/jeremy/Documents/fac/l2/session_4/projet_isola/Case'
+require './cell'
 
 #initialisation de la bibliotheque GTK(on ne peut pas creer d'objet avant d'avoir appele cette methode)
 Gtk.init
@@ -23,35 +23,25 @@ window.signal_connect('destroy') {
 
 }
 
-table = Gtk::Table.new(8,4)
+#creation de la table
+table = Gtk::Table.new(6,6)
 
-img = Gtk::Image.new('/home/jeremy/Documents/fac/l2/session_4/projet_isola/case_blanche.png')
-
-for i in 0..3
-  for j in 0..3
+for i in 0..5
+  for j in 0..5
 
     #puts "#{j} #{j+1} #{i} #{i+1}"
-    table.attach((Gtk::EventBox.new.add(Gtk::Image.new('/home/jeremy/Documents/fac/l2/session_4/projet_isola/case_blanche.png'))), j, j+1, i, i+1)
-    #table.attach(, j, j+1, i, i+1)
+    table.attach((Gtk::EventBox.new.add(Gtk::Image.new('./images/case_blanche.png'))), j, j+1, i, i+1)
 
   end
 end
 
-for i in 0..3
-  for j in 0..3
-
-    
-
-  end
-end
-
-=begin for unCase in table
-
+for unCase in table
+  
   unCase.signal_connect('button_press_event') {
     print "Clicked."
   }
-
-=end
+    
+end
 
 #creation d'une variable bouton
 button = Gtk::Button.new('click on')
