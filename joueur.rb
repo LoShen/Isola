@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-Time-stamp: <2015-03-12 14:21:50 oxedora>
+Time-stamp: <2015-03-16 14:47:24 chilya>
 
 require './pion.rb'
 require './cell.rb'
@@ -21,7 +21,7 @@ class Joueur
 
   def seDeplacer(Cell c)
     if caseProche(c) && c.isAccessible #Verifie si la case est valide
-      @pion.nouvellePos(c)#Si oui, fait changer le pion de position
+      @pion.nouvellePosition(c)#Si oui, fait changer le pion de position
       @etape = @etape+1#Ca s'est bien passe donc on passe a l'etape suivante
     end
     (caseProche(c) && c.isAccessible)#Renvoie un booleen pour savoir comment s'est passe l'operation
