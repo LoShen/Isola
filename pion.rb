@@ -1,7 +1,9 @@
 #!/usr/bin/ruby 1.9.3
 # -*- coding: utf-8 -*-
 
-load 'cell.rb'
+# Time-stamp: <2015-03-16 21:34:27 chilya>  le # etait necessaire pour que ca interprete, mais c'est toujours fonctionnel, donc osef.
+
+require './cell.rb'
 
 class Pion 
 
@@ -17,27 +19,21 @@ class Pion
     @y=y
   end
 
-
   #methodes
 
-  def getX
-    @x
-  end
-
-  def getY
-    @y
-  end 
-
   def caseProche (&cell)
-    if (abs.(x-@x) > 1) then
-      false
-    else true
+    if abs.(cell.x-@x) == 1 && abs.(cell.y-@y) == 1 then
+      true
+    else false
     end
   end
 
-  def nouvellePosition x,y
-    @x=x
-    @y=y
+  def nouvellePosition (&cell)
+    if this.caseProche(cell)
+      @x=cell.x
+      @y=cell.y
+    end
+
   end
 
 end
