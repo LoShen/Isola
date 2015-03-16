@@ -1,6 +1,7 @@
 #!/usr/bin/ruby 1.9.3
 # -*- coding: utf-8 -*-
 
+load 'cell.rb'
 
 class Pion 
 
@@ -27,7 +28,7 @@ class Pion
     @y
   end 
 
-  def caseProche x,y
+  def caseProche (&cell)
     if (abs.(x-@x) > 1) then
       false
     else true
