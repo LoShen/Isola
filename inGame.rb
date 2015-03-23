@@ -1,9 +1,6 @@
 #!/usr/bin/ruby
 # -*- coding: utf-8 -*-
 
-require 'gtk2'
-load 'board.rb'
-
 Gtk.init
 
 window = Gtk::Window.new
@@ -13,21 +10,26 @@ window.signal_connect('destroy') { Gtk.main_quit }
 lines = 6
 columns = 6
 
+$j1 = Gtk::Image.new('./images/pion_j1.png')
+
 aVbox = Gtk::VBox.new
 baHbox = Gtk::HBox.new
 bbHbox = Gtk::HBox.new
-catable = Gtk::Table.new(lines, columns)
+$catable = Gtk::Table.new(lines, columns)
+fixed = Gtk::Fixed.new
 cbVbox = Gtk::VBox.new
-mat = Board.new(lines, columns)
+#mat = Board.new(lines, columns)
+#$game = GameController.new
 
 for i in 0..(lines - 1)
   	for j in 0..(columns - 1)
-  		catable.attach(mat[i][j], j, j+1, i, i+1)
+  		$catable.attach(GraphicCell.new(i, j), j, j+1, i, i+1)
   	end
 end
 cbVbox.add(Gtk::Button.new('Joueur 1'))
+fixed.put($catable, 0.5, 0.5)
 
-baHbox.add(catable)
+baHbox.add(fixed)
 baHbox.add(cbVbox)
 
 bbHbox.add(Gtk::Button.new('Bonus 1'))

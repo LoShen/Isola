@@ -8,10 +8,8 @@ Attributs et comportement
 du plateau.
 
 Auteur : Celia Rouquairol
-Derniere modification : Fevrier 2015
+Derniere modification : Mars 2015
 """
-
-load "cell.rb"
 
 class Board
 
@@ -46,7 +44,7 @@ class Board
 
 end
 
-
+=begin
 Gtk.init
 	window = Gtk::Window.new
 	#window.set_size_request 450, 250 # taille par defaut de la fenetre
@@ -65,11 +63,7 @@ Gtk.init
   		table.attach(mat[i][j], j, j+1, i, i+1)
   	end
   end
-  
-  print "\n"
-  print "\n"
-  print "\n"
-  
+
   window.add(table)
   '''
   $i = 0
@@ -116,3 +110,4 @@ puts mat[1][3].isAccessible
 puts mat[2][3].isAccessible
 '''
 Gtk.main
+=end
