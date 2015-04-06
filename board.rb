@@ -34,32 +34,7 @@ class Board
       print "\n"
     end
     #Initialisation de la valeur des cases
-    l1 =0
-    l2 = @lines-1
-    c1 = 0
-    c2 = @columns-1
-    v = 1
-
-    while (l1 <= @lines/2 || c1 <= @columns/2) do
-      for l in (l1..l2)
-        for c in (c1..c2)
-          if (l==l1 || l==l2) && (c==c1 || c==c2)
-            @board[l][c].set_value(v-1)
-          else
-            if l==l1 || l==l2
-              @board[l][c].set_value(v)
-            elsif c==c1 || c==c2
-              @board[l][c].set_value(v)
-            end
-          end
-        end#for c
-      end#for l
-      l1+=1
-      l2-=1
-      c1+=1
-      c2-=1
-      v+=2
-    end#endwhile
+    init_CellValue
  
     #Affichage de verification
     puts "\n\n"
@@ -76,6 +51,35 @@ class Board
     # NB : board[2] est un array
     # board[1][2] accède à la cell à la position 1, 2
     @board[i]
+  end
+
+  def init_CellValue
+    l1 = 0
+    l2 = @lines-1
+    c1 = 0
+    c2 = @columns-1
+    v = 1
+
+    while (l1 <= @lines/2 || c1 <= @columns/2) do
+      for l in (l1..l2)
+        for c in (c1..c2)
+          if (l==l1 || l==l2) && (c==c1 || c==c2)
+            @board[l][c].value = v-1
+          else
+            if l==l1 || l==l2
+              @board[l][c].value = v
+            elsif c==c1 || c==c2
+              @board[l][c].value = v
+            end
+          end
+        end#for c
+      end#for l
+      l1+=1
+      l2-=1
+      c1+=1
+      c2-=1
+      v+=2
+    end#endwhile
   end
 
 end

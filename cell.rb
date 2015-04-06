@@ -29,10 +29,6 @@ class Cell
       @x = newX
       @y = newY
     end
-
-    def set_value(v)
-      @value = v
-    end
     
     def renvoie
       print "["
