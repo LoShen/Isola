@@ -16,16 +16,22 @@ class Cell
   attr_accessor :x
   attr_accessor :y
   attr_accessor :state
+  attr_accessor :value
   
   def initialize(x, y)
     @state = State::White # L'état de la case
     @x = x # Les coordonnées de la case
     @y = y
+    @value = 0
 	end
     
     def set_x_y(newX, newY)
       @x = newX
       @y = newY
+    end
+
+    def set_value(v)
+      @value = v
     end
     
     def renvoie
@@ -33,7 +39,10 @@ class Cell
       print @x
       print "]["
       print @y
-      print "] "
+      print "]"
+      print "="
+      print @value
+      print " "
     end
     
     def state=(newState)
