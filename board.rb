@@ -29,10 +29,10 @@ class Board
       for incCol in (0..newColumns-1) # Pour chaque combinaison de lignes et de colonnes
         @board[incLig][incCol] = Cell.new(incLig, incCol) # On crée une nouvelle cellule avec la position correspondante
         @board[incLig][incCol].set_x_y(incLig, incCol)
-        @board[incLig][incCol].renvoie
-      end
+        @board[incLig][incCol].renvoieCoo
+      end#Fin du for inCol
       print "\n"
-    end
+    end#Fin du for incLig
     #Initialisation de la valeur des cases
     init_CellValue
  
@@ -40,11 +40,11 @@ class Board
     puts "\n\n"
     (0..@lines-1).each do |i|
        (0..@columns-1).each do |j|   
-          @board[i][j].renvoie
+          @board[i][j].renvoiePond
         end
       puts"\n"
-      end    
-  end
+      end#Fin du for d'affichage
+  end#Fin du constructeur
 
   def [](i)
     # Définit l'accesseur [] pour la classe Board
@@ -53,12 +53,12 @@ class Board
     @board[i]
   end
 
-  def init_CellValue
-    l1 = 0
-    l2 = @lines-1
-    c1 = 0
-    c2 = @columns-1
-    v = 1
+  def init_CellValue#Initialisation de la ponderation de chacune des cellules en partant des bords, puis en retrecissant progressivement jusqu'au centre
+    l1 = 0#Coordonnee ligne minimale
+    l2 = @lines-1#Coordonnee ligne maximale
+    c1 = 0#Coordonnee colonne minimale
+    c2 = @columns-1#Coordonnee ligne maximale
+    v = 1#Valeur donnee a la case
 
     while (l1 <= @lines/2 || c1 <= @columns/2) do
       for l in (l1..l2)
