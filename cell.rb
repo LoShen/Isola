@@ -8,7 +8,7 @@ Attributs et comportement
 des cases du plateau.
 
 Auteur : Celia Rouquairol
-Derniere modification : Mars 2015
+Derniere modification : Avril 2015
 """
 
 class Cell
@@ -19,6 +19,7 @@ class Cell
   attr_accessor :value
   
   def initialize(x, y)
+  	# Crée une case de coordonnées (x, y) dont l'état est blanc par défaut et la pondération (value) nulle
     @state = State::White # L'état de la case
     @x = x # Les coordonnées de la case
     @y = y
@@ -26,11 +27,13 @@ class Cell
   end
   
   def set_x_y(newX, newY)
+  	# Modifie les cordonnées de la case
     @x = newX
     @y = newY
   end
   
   def renvoieCoo
+  	# Renvoie les cordoonées de la case
     print "["
     print @x
     print "]["
@@ -39,12 +42,14 @@ class Cell
   end
 
   def renvoiePond
+  	# Renvoie la pondération de la case
     print "["
     print @value
     print "]"
   end
 
   def renvoie
+  	# Renvoie la pondération d'un case ainsi que ses coordonnées
     print "["
     print @x
     print "]["
@@ -55,6 +60,7 @@ class Cell
   end
 
   def state=(newState)
+  	# Modifie l'état de la case
     @state = newState
   end
   
@@ -78,28 +84,18 @@ class Cell
   end
   
   def updateValue(v)
+  	# Ajoute la valeur v à la pondération de la case
     @value+=v
   end
 
-  def caseProcheValide(i, j)#i et j les coordonnées de la case testée, si elle est proche et jouable par rapport a la cellule appelante
+  def caseProcheValide(i, j)
+  	# Renvoie vrai si la case aux coordonnées (i, j) est jouable et une case proche de la cellule appelante
     #(!(@x == i and @y == j) && ((i > -1 && j > -1) && (i < $game.board.lines && j < $game.board.columns)))
     ( ( (0 .. $game.board.lines-1).include?(i) and (0 .. $game.board.columns-1).include?(j) ) && !(@x == i and @y == j) ) 
   end
 
-  def noircirCaseLog
-    #On itère sur les cases proches pour mettre a jour leur valeur
-    (@x-1..@x+1).each do |i|
-      (@y-1..@y+1).each do |j|
-        if $game.board[@x][@y].caseProcheValide(i, j)
-          #puts "Boucle x="+i.to_s+" y="+j.to_s
-          $game.board[i][j].updateValue(-1)
-        end
-      end
-    end
-  end
-
-  def moveTokenLog(v)
-    #on itère sur les cases proches de la position pour mettre a jour les valeurs des cases.
+  def updateCellsAround(v)
+    # Lorsqu'une case est noircie ou occupée par un joueur, on décrémente la valeur de ses cases proches jouables
     (@x-1..@x+1).each do |i|
       (@y-1..@y+1).each do |j|
         if $game.board[@x][@y].caseProcheValide(i, j)
