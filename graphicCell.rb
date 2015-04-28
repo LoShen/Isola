@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #!/usr/bin/ruby
 # -*- coding: utf-8 -*-
 
@@ -9,162 +8,201 @@ Attributs et comportement
 des cases du plateau.
 
 Auteur : Celia Rouquairol
-Derniere modification : Avril 2015
+Derniere modification : Mars 2015
 """
 
 class GraphicCell < Gtk::HBox
 
   attr_reader :x
   attr_reader :y
-  attr_accessor :picture # Image de la case
-  attr_accessor :ebox # EventBox contenant l'image
+  attr_accessor :picture
+  attr_accessor :ebox
   
   def initialize(x, y)
-  	# Crée une case de coordonnées (x, y) et blanche par défaut
-    super # Constructeur de la classe mère
+    super
     @x = x
     @y = y
-    @picture = Gtk::Image.new('./images/case_blanche.png') # Image par défaut
-    @ebox = Gtk::EventBox.new.add(@picture) # L'image est placée dans une EventBox pour être cliquable
+    @picture = Gtk::Image.new('./images/case_blanche.png')
+    @ebox = Gtk::EventBox.new.add(@picture)
     add(@ebox) # N'affiche pas ebox en tant qu'élément graphique sinon
-    signal_connect('button_press_event') do # Comportement de la case au clic
-      puts $game.playersList[$game.current].pseudo.to_s+" "
-      $game.board[@x][@y].renvoie # instruction de test, a supprimer pour la prod
-      #puts @state # instruction de test, a supprimer pour la prod
-
-      if $game.playersList[$game.current].pion.x == -1 # Si le joueur actuel n'a pas encore placé son pion
-        $game.board[@x][@y].updateCellsAround(-1) # Les cases proches de la cellule cliquée sont dévaluées
-        puts "AVANT UPDATE BOARD "+@x.to_s+ " "+@y.to_s
-        updateBoard($game.board[@x][@y]) # Le plateau est mis à jour
-        nextPlayer # On passe au joueur suivant
-        if $game.playersList[$game.current].est_IA # Si le joueur suivant est une IA
-        	iaPlacerPion
-        end # est_IA
-      else
-        case $game.playersList[$game.current].etape # On vérifie à quelle étape correspond le clic
-        when 1 then # S'il correspond au déplacement
-          if $game.board[@x][@y].isAccessible and $game.playersList[$game.current].pion.caseProche($game.board[@x][@y])
-          	# Si la case cliquée est libre et proche du pion
-            moveToken($game.board[@x][@y]) # Le pion est déplacé sur cette case
-            updateBoard($game.board[@x][@y]) # Le plateau est mis à jour
-            nextStep # Le joueur passe à l'étape suivante
-          end # case valide
-        when 2 then # S'il correspond au noircissement d'une case
-          if $game.board[@x][@y].isAccessible # Si la case est blanche
-            noircirCase($game.board[@x][@y]) # On la noircit
-            nextStep # Le joueur passe à l'étape suivante
-            endGamePopUp # On vérifie si le joueur n'a pas perdu
-            nextPlayer # On passe au joueur suivant
-            if $game.playersList[$game.current].est_IA # Si le joueur suivant est une IA
-              iaJouerTour
-            else
-              endGamePopUp
-            end # est_IA
-					end # case blanche
-				end # case when
-          endGamePopUp          
-			end # étape
-		end
-	end
-
-  def iaJouerTour
-  	cible = $game.playersList[$game.current].pion.maxCaseProche # Il se déplace sur la case proche la plus avantageuse
-    puts cible.renvoieCoo
-    if ((0..$game.board.lines-1).include?(cible.x) && (0..$game.board.columns-1).include?(cible.y)) # Si la case est valide
-    	moveToken(cible) # Le pion est déplacé sur cette case
-      updateBoard(cible) # Le plateau est mis à jour
-     	puts "Position de l'IA "+$game.playersList[$game.current].pion.x.to_s+" "+$game.playersList[$game.current].pion.y.to_s
-      noircirCase($game.playersList[$game.current-1].pion.maxCaseProche) # L'IA noircit la case la plus avantageuse de l'autre joueur
-      endGamePopUp # On vérifie si l'IA n'a pas perdu
-      nextPlayer # On passe au joueur suivant
+    
+    signal_connect('button_press_event') do # Comportement de la cellule au clic
+		if $game.playersList[$game.current].pion.x == -1 # Si le joueur n'a pas encore placé son pion
+			placerPion
+		elsif $game.playersList[$game.current].bonusEnCours != 'None' # Si le joueur utilise un bonus
+			jouerBonus
+		else # Si le joueur se déplace ou noircit une case
+			jouerEtape
+        end
     end
   end
   
-  def iaPlacerPion
-  	# Place le pion de l'IA lorsqu'il n'est pas initialisé
-		cible = $game.playersList[$game.current].iaCaseDepart # Elle choisit sa case de départ
-    cible.updateCellsAround(-1) # Les cases proches sont dévaluées
-    updateBoard(cible) # Le plateau est mis à jour
-    #puts  $game.playersList[$game.current].pion.x.to_s+" "+ $game.playersList[$game.current].pion.y.to_s
-    nextPlayer # On passe au joueur suivant
+  def jouerBonus
+  # Liste des actions sur la case cliquée lorsqu'un joueur utilise un bonus
+	case $game.playersList[$game.current].bonusEnCours
+		when 'Blanchir' then
+			blanchirCaseBonus($game.board[@x][@y])
+		when 'Noircir' then
+			noircirCase($game.board[@x][@y])
+		when 'Teleport' then
+			moveToken(@x, @y)
+		end
+		updateBoard($game.board[@x][@y])
   end
   
-  def moveToken(newCell) 
-  	# Déplace le pion du joueur sur la case newCell
-    #puts "EST UNE CASE PROCHE : " +$game.playersList[$game.current].pion.caseProche($game.board[@x][@y]).to_s
-    #puts "ACCESSIBLE : " + $game.board[@x][@y].isAccessible.to_s
+  def jouerEtapeIA
+  # Liste des actions lorsque l'IA joue son tour
+	cible = $game.playersList[$game.current].pion.maxCaseProche
+	# cible est la cellule vers laquelle l'ia va se déplcaer
+	if ((0..$game.board.lines-1).include?(cible.x) && (0..$game.board.columns-1).include?(cible.y))
+	# Si la cible est dans les limites du plateau
+		moveToken(cible.x, cible.y) # L'ia déplace son pion
+		updateBoard(cible) # Le plateau est mis à joue
+		noircirCase($game.playersList[$game.current-1].pion.maxCaseProche) # L'ia noircit une case proche de son adversaire
+		endGamePopUp # On vérifie si l'ia a perdu
+		nextPlayer # On passe au joueur suivant
+	end
+  end
+  
+  def jouerEtape
+  # Liste des actions au tour classique d'un joueur (bouger le pion et noircir une case)
+	case $game.playersList[$game.current].etape
+		when 1 then # Si le joueur doit se déplacer
+			if $game.board[@x][@y].isAccessible and $game.playersList[$game.current].pion.caseProche($game.board[@x][@y])
+			# Si la case cliquée est libre et proche du pion du joueur
+				moveToken(@x, @y) # Le joueur déplace son pion
+				recupBonus # Il récupère éventuellement un bonus
+				updateBoard($game.board[@x][@y]) # L'affichage du plateau est mis à jour
+				nextStep # On passe à l'étape suivante
+			end
+		when 2 then # Si le joueur doit noircir une case
+			if $game.board[@x][@y].isAccessible # Si cette case est libre
+				noircirCase($game.board[@x][@y]) # Elle est noircie
+				nextStep # Le joueur passe à l'étape suivante
+				endGamePopUp # On vérifie si le joueur a perdu
+				nextPlayer # On passe au joueur suivant
+			if $game.playersList[$game.current].est_IA # Si le joueur suivant est une ia
+				jouerEtapeIA # On déclenche son tour sans clic
+			end
+		end
+    endGamePopUp # On vérifie si le joueur suivant a perdu (avant son tour, avant qu'il clique)          
+  end
+  
+  def moveToken(x, y) # On déplace le pion
     oldX = $game.playersList[$game.current].pion.x # facilite la lecture pour la suite de la méthode
     oldY = $game.playersList[$game.current].pion.y
     $game.board[oldX][oldY].state = State::White # L'ancienne case du pion redevient disponible
 
-    logToGraph(oldX, oldY, './images/case_blanche.png') #change l'image de la case graphique associée a sa case logique
+    logToGraph(oldX, oldY, './images/case_blanche.png') # change l'image de la case graphique associée a sa case logique
 
-    $game.board[oldX][oldY].updateCellsAround(1) # La valeur des cases proches de l'ancienne position du pion est augmentée
-    $game.board[newCell.x][newCell.y].updateCellsAround(-1) # Les cases proches de la nouvelle position sont dévaluées
+    $game.board[oldX][oldY].updateCaseProcheValue(1) # L'ancienne case devenant libre, on incrémente la pondération des cases qui lui sont proches
+    $game.board[x][y].updateCaseProcheValue(-1) # On décrémente en revanche la pondération des cases proches de la case de destination
+  end
+
+  def recupBonus
+  # Place le bonus récupéré dans l'inventaire du joueur
+    if $game.board[@x][@y].bonus != 'None'
+      indice = $game.board[@x][@y].bonus # Chaque bonus correspond à un numéro
+      $game.playersList[$game.current].tableauBonus[indice] = true # On place un booléen vrai à l'indice du tableau correspondant au bonus
+      $game.board[@x][@y].bonus = 'None' # Il n'y a plus de bonus sur cette case puisque le joueur l'a ramassé
+    end
   end
 
   def noircirCase(cell) 
-  	# Noircit la case cell
-    $game.board[cell.x][cell.y].updateCellsAround(-1) # Les cases proches sont dévaluées
-    $game.board[cell.x][cell.y].state = State::Black # L'état est mis à jour
-    logToGraph(cell.x, cell.y, './images/case_noiwe.png') # L'image également
-    puts cell.isAccessible
+  # Noircit une case cliquée par un joueur et modifie la pondération des cases proches
+    $game.board[cell.x][cell.y].updateCaseProcheValue(-1)
+    $game.board[cell.x][cell.y].state = State::Black
+    logToGraph(cell.x, cell.y, './images/case_noiwe.png')
+  end
+
+  def placerPion
+  # Liste des actions du joueur lorsqu'il place son pion pour la première fois
+	$game.board[@x][@y].updateCaseProcheValue(-1) # On décrémente la valeur des cases proches
+    recupBonus # Le joueur récupère un éventuel bonus
+    updateBoard($game.board[@x][@y]) # L'affichage du plateau est mis à jour
+    nextPlayer # On passe au joueur suivant
+	if $game.playersList[$game.current].est_IA # Si le joueur suivant est une IA, on la fait jouer sans clic
+		cible = $game.playersList[$game.current].iaCaseDepart # Elle se place sur la case la plus avantageuse
+        cible.updateCaseProcheValue(-1) # La pondération des cases proches est dévaluée
+        recupBonus # L'ia récupère éventuellement un bonus
+        updateBoard(cible) # L'affichage du plateau est mis à jour
+        nextPlayer # On passe au joueur suivant
+    end
+  end
+  
+  def blanchirCaseBonus(cell) 
+  # Blanchit une case cliquée par un joueur et modifie la pondération des cases proches
+    $game.board[cell.x][cell.y].updateCaseProcheValue(1)
+    $game.board[cell.x][cell.y].state = State::White
+    logToGraph(cell.x, cell.y, './images/case_blanche.png')
   end
   
   def updateBoard(cell) 
-  	# Déplace le pion, rafraichit l'affichage
+  # Déplace le pion, rafraichit l'affichage
     $game.board[cell.x][cell.y].state = State::Player # La case est désormais occupée par un joueur
-    $game.playersList[$game.current].seDeplacer(cell) # Le pion est déplacé sur la cellule
+    $game.playersList[$game.current].seDeplacer(cell) # Le pion est déplacé sur la case
     logToGraph(cell.x, cell.y, $game.playersList[$game.current].pion.image) # L'image du pion est placée sur la case choisie
   end
 
   def nextPlayer 
-  	# Passage au joueur suivant, bouclage de la liste
+  # Passage au joueur suivant, bouclage de la liste
     $game.current += 1 # On passe au joueur suivant
-    if $game.current == $game.nbPlayers then $game.current = 0 end # Si le joueur est le dernier de la liste, on retourne au premier
+    if $game.current == $game.nbPlayers then $game.current = 0 end 
+		# Si le joueur est le dernier de la liste, on retourne au premier
   end
 
   def nextStep 
-  	# Passage a l'etape suivante pour le joueur en cours
+  # Passage a l'etape suivante pour le joueur en cours
     $game.playersList[$game.current].etape += 1 # On passe a l'etape suivante
     if $game.playersList[$game.current].etape == 3 then $game.playersList[$game.current].etape = 1 end # Si on a fait la derniere etape, on reset
   end
 
   def logToGraph(x, y, image) 
-  	#Retrouve la cellule graphique associée à la bonne cellule logique et en change son image
-    j = $game.board.columns - 1 # Le for parcourt depuis la fin de la table
+  # Retrouve la cellule graphique associée à la bonne cellule logique et en change son image
+    j = $game.board.columns - 1 # Indices des cases logiques
     i = $game.board.lines - 1
 
-    for cell in $catable do # On itère sur chaque case pour trouver celle où était placé le pion
-      if(i == x && j == y) # Si on trouve la bonne case
-        cell.picture.set(image) # On change son image
-        break # On arrête le parcours
+    for cell in $catable do # On itère sur chaque case graphique pour trouver celle où était placé le pion
+      if(i == x && j == y) # Si les indices correspondent aux coordonnées (x, y) de la cellule cliquée)
+        cell.picture.set(image) # On modifie l'image de la cellule (blanche ou occupée par un pion)
+        break # Plus besoin de parcourir le reste du plateau
       end
-      # On décrémente manuellement
-      j = j - 1
+      # Décrémentation manuelle simulant deux boucles for
+      j = j - 1 
       if j < 0
         j = $game.board.columns - 1
         i = i - 1
       end
     end
   end
-
+	"""
   def endGamePopUp
-  	# Si le joueur a perdu, on affiche une fenêtre le signalant
-    if !$game.playersList[$game.current].canPlay # Si le joueur est dans une phase de jeu classique, test s'il peut jouer
-      label = Gtk::Label.new($game.playersList[$game.current].pseudo.to_s+" a perdu !")
-      button = Gtk::Button.new("Ok :'(")
+  # Si le joueur a perdu, on affiche un pop up qui informe que la partie est finie et renvoie au menu
+    if $game.playersList[$game.current-1].canPlay && !$game.playersList[$game.current].canPlay 
+		# Si le joueur précédent n'a pas déjà perdu et que le joueur actuel ne peut pas se déplacer, la partie prend fin
+      label = Gtk::Label.new($game.playersList[$game.current].pseudo.to_s+' a perdu !')
+      # On indique quel joueur a perdu la partie
+      button = Gtk::Button.new('Revenir au menu')
+      button.set_size_request(180, 35)
       button.signal_connect('button_press_event') do
-        Gtk.main_quit
+        $endOfProgramm = false
+        
+        window.destroy
+        $window.destroy
+        
+        main
       end
-      window = Gtk::Window.new
+      window = Gtk::Window.new(Gtk::Window::POPUP)
+      window.set_default_size(200, 150)
+      window.set_window_position :center
+      
+      alignement = Gtk::Alignement.new(0.5, 0.5, 0, 0)
+      alignement.add(button)
+      
       vbox = Gtk::VBox.new
       vbox.add(label)
-      vbox.add(button)
-      window.add(vbox)
-      window.set_default_size(100, 50)
-      window.set_window_position :center
       window.show_all
     end
   end  
+  """
 end

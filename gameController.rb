@@ -9,23 +9,25 @@ Elle fait le lien entre toutes
 les autres classes.
 
 Auteur : Celia Rouquairol
-Derniere modification : Avril 2015
+Derniere modification : Mars 2015
 """
 
 
 class GameController
 
   attr_accessor :playersList # Tableau a une dimension
-  attr_accessor :nbPlayers # Nombre de joueurs
+  attr_accessor :nbPlayers
   attr_accessor :current # joueur actuel
   attr_accessor :board # Tableau a deux dimensions
   
-  def initialize(nb = 2, boardLines = 6, boardColumns = 6)
-    # Créer un tableau de nb joueurs ainsi qu'un plateau de boardLines lignes et boardColumns colonnes (6x6 par défaut)
-    @current = 0 # Le joueur actuel
-    @nbPlayers = nb # Nombre total de joueur
-    @playersList = [Joueur.new('Edouard', './images/pion_j0.png'), Joueur.new('Selyah', './images/pion_j1.png', true)] # tableau du nombre de joueurs
-    @board = Board.new(boardLines, boardColumns)
+  def initialize(tabInit)
+    # Créer un tableau de joueurs ainsi qu'un plateau avec les valeurs de tabInit
+		# tabInit contient les informations fournies par l'utilisateur
+    @current = 0
+    @nbPlayers = tabInit[0]
+    @playersList = [Joueur.new(tabInit[3], tabInit[7], tabInit[5]), Joueur.new(tabInit[4], tabInit[8], tabInit[6])] 
+		#	 Création du tableau des joueurs (pseudo, image, IA ou joueur humain)
+    @board = Board.new(tabInit[1], tabInit[2])
   end
   
   def canMove(currentPlayer) # Supprimer si la fonction du joueur fonctionne

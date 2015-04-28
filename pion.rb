@@ -27,47 +27,47 @@ class Pion
   end
 
   def maxCaseProche 
-  	# Récuperation de la case ayant la plus grosse value
+  # Renvoie la case proche ayant la plus grosse pondération pour l'ia
     x = -1
     y = -1
     v = -10
-    
-    puts "Preboucle de maxCaseProche x="+x.to_s+" y="+y.to_s
-    puts "Coordonnes du pion avant la boucle x="+@x.to_s+" y="+@y.to_s
-    (@x-1..@x+1).each do |i| # Pour chaque case proche du pion
+	
+    (@x-1..@x+1).each do |i|
       (@y-1..@y+1).each do |j|
-        #puts "Dans la boucle i="+i.to_s+" j="+j.to_s+" valeur de la case = "+$game.board[i][j].value.to_s
-        if ( $game.board[@x][@y].caseProcheValide(i, j) && $game.board[i][j].isAccessible ) # Si la case existe et est accessible
-          if (v < $game.board[i][j].value) # Si sa valeur est plus grande que v, soit la plus grosse value actuelle
-            #puts "Boucle de maxCaseProche x="+x.to_s+" y="+y.to_s
+	  	# Pour chaque case proche
+        if ( $game.board[@x][@y].caseProcheValide(i, j) && $game.board[i][j].isAccessible )
+				# Si c'est une case blanche dans les limites du plateau
+          if (v < $game.board[i][j].value)
+            # Si sa valeur est plus grande que v
             x = i # On récupère les coordonnées de la case correspondante
             y = j
-            v = $game.board[i][j].value # Ainsi que sa valeur
+            v = $game.board[i][j].value # Ainsi que la valeur en question
           end
         end
       end
     end
-    Cell.new(x, y) # On renvoie une cellule avec les coordonnées correspondantes
+    Cell.new(x, y) # On renvoie la cellule ainsi choisie
   end
 
   def nouvellePosition(cell)
-  	# Modifie la position du pion pour correspondre à celle de la case cell
     @x=cell.x
     @y=cell.y
   end
 
   def canMove
-  	# Renvoie vrai si le pion est déplaçable, faux sinon
-    res = false # Faux par défaut
-    for i in @x-1..@x+1 # Pour chaque case proche
+  # Renvoie vrai si le pion peut se déplacer, faux sinon
+    res = false # Résultat
+    for i in @x-1..@x+1
       for j in @y-1..@y+1
-        if (0..$game.board.lines-1).include?(i) && (0..$game.board.columns-1).include?(j) # Si la case est valide
-          if $game.board[i][j].isAccessible then res = true end # Si elle est accessible alors le pion est déplaçable
-          if res then break end # S'il y a au moins une case où le pion peut se déplacer, on arrête le parcourt
+	  		# Pour chaque case proche du pion
+        if (0..$game.board.lines-1).include?(i) && (0..$game.board.columns-1).include?(j) 
+				# Si elle est dans les limites du plateau
+          if $game.board[i][j].isAccessible then res = true end # Si elle est accessible alors le pion peut se déplacer
+          if res then break end # Si au moins une case est accessible, le pion peut se déplacer
         end
       end
     end
-    res # On renvoit le résultat
+    res
   end
 
 
