@@ -13,7 +13,7 @@ lance le jeu.
 Auteur : Celia Rouquairol
 Derniere modification : Mars 2015
 """
-
+$bonus = true
 # Le but ici c'est de reprendre l'idée de Jérémy et de charger tous les fichiers pour éviter d'avoir des inclusions trop profondes.
 # Il faut faire attention à l'ordre d'inclusion.
 require 'gtk2'
@@ -23,6 +23,7 @@ require './cell.rb'
 require './joueur.rb'
 require './board.rb'
 require './gameController.rb'
-$game = GameController.new
+tab = [2, 6, 6, "Selyah", "Oxedobra", false, true, './images/pion_j0.png','./images/pion_j1.png']
+$game = GameController.new(tab)
 require './graphicCell.rb'
 require './inGame.rb'

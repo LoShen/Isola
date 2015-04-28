@@ -1,7 +1,7 @@
 #!/usr/bin/ruby 1.9.3
 # -*- coding: utf-8 -*-
 
-# Time-stamp: <2015-04-11 15:16:38 oxedora>
+# Time-stamp: <2015-04-28 18:01:14 oxedora>
 
 class Pion 
 
@@ -49,6 +49,28 @@ class Pion
     Cell.new(x, y) # On renvoie la cellule ainsi choisie
   end
 
+  def closestBlackCell
+    x = -1
+    y = -1
+    v = -100
+    
+    (@x-1..@x+1).each do |i|
+      (@y-1..@y+1).each do |j|
+        # Pour chaque case proche
+        if ( $game.board[@x][@y].caseProcheValide(i, j) && $game.board[i][j].state == State::Black )
+          # Si c'est une case noire dans les limites du plateau
+          if (v < $game.board[i][j].value)
+            # Si sa valeur est plus grande que v
+            x = i # On récupère les coordonnées de la case correspondante
+            y = j
+            v = $game.board[i][j].value # Ainsi que la valeur en question
+          end
+        end
+      end
+    end
+    Cell.new(x, y) # On renvoie la cellule ainsi choisie
+  end
+    
   def nouvellePosition(cell)
     @x=cell.x
     @y=cell.y

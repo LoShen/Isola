@@ -30,7 +30,7 @@ class Board
     end
     
     init_CellValue # Initialisation de la pondération des cases
-    alea_bonus # Initialisation des bonus
+    if $bonus then alea_bonus end# Initialisation des bonus
   end
 
   def [](i)
@@ -81,6 +81,20 @@ class Board
       @board[x][y].bonus = rand(3) # Catégorie aléatoire
       nbBonus -= 1 # On décrémente le nombre de bonus restant à placer
     end
+  end
+
+  def bestCell
+    x = -1
+    y = -1
+    v = -100
+    @board.each do |cellule|
+      if cellule.value >= v
+        x = cellule.x
+        y = cellule.y
+        v = cellule.value
+      end
+    end
+    $game.board[x][y]
   end
 
 end

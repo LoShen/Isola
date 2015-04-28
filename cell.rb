@@ -37,23 +37,38 @@ class Cell
   end
 
   def caseProcheValide(i, j)
-  # Renvoie vrai si la case aux coordonnées (i, j) est jouable et proche de la cellule appelante, faux sinon
+    # Renvoie vrai si la case aux coordonnées (i, j) est jouable et proche de la cellule appelante, faux sinon
     ( ( (0 .. $game.board.lines-1).include?(i) and (0 .. $game.board.columns-1).include?(j) ) && !(@x == i and @y == j) ) 
   end
 
   def updateCaseProcheValue(v)
-  # Lorsqu'une case est noircie, occupée ou libérée par un joueur,
-  # la pondération des cases proches est modifiée en fonction
+    # Lorsqu'une case est noircie, occupée ou libérée par un joueur,
+    # la pondération des cases proches est modifiée en fonction
     (@x-1..@x+1).each do |i|
       (@y-1..@y+1).each do |j|
-      # Pour chaque case proche de la cellule
+        # Pour chaque case proche de la cellule
         if $game.board[@x][@y].caseProcheValide(i, j)
-        # Si elle est dans les limites du plateau
+          # Si elle est dans les limites du plateau
           $game.board[i][j].updateValue(v)
           # On change sa valeur
         end
       end
     end
+  end
+
+  def nbCasesLibresProches
+    cpt = 0
+    (@x-1..@x+1).each do |i|
+      (@y-1..@y+1).each do |j|
+        # Pour chaque case proche de la cellule
+        if $game.board[@x][@y].caseProcheValide(i, j) && $game.board[@x][@y].isAccessible 
+          # Si elle est dans les limites du plateau et accessible
+          cpt+=1
+            # On incrémente
+        end
+      end
+    end
+    cpt
   end
 
 end
