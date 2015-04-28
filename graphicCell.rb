@@ -236,7 +236,7 @@ class GraphicCell < Gtk::HBox
   
   def endGameBonus
     endGamePopUp
-    $game.current+=1
+    nextPlayer
     endGamePopUp
     $game.current-=1
   end
@@ -246,28 +246,30 @@ class GraphicCell < Gtk::HBox
   # Si le joueur a perdu, on affiche un pop up qui informe que la partie est finie et renvoie au menu
     if $game.playersList[$game.current-1].canPlay && !$game.playersList[$game.current].canPlay 
 		# Si le joueur précédent n'a pas déjà perdu et que le joueur actuel ne peut pas se déplacer, la partie prend fin
+			endwindow = Gtk::Window.new(Gtk::Window::POPUP)
+      endwindow.set_default_size(200, 150)
+      endwindow.set_window_position :center
+      
       label = Gtk::Label.new($game.playersList[$game.current].pseudo.to_s+' a perdu !')
       # On indique quel joueur a perdu la partie
+      
       button = Gtk::Button.new('Revenir au menu')
       button.set_size_request(180, 35)
       button.signal_connect('button_press_event') do
         $endOfProgramm = false
         
+        endwindow.destroy
         window.destroy
-        $window.destroy
-        
-        main
+        Gtk.main_quit
+        #main
       end
-      window = Gtk::Window.new(Gtk::Window::POPUP)
-      window.set_default_size(200, 150)
-      window.set_window_position :center
-      
-      alignement = Gtk::Alignement.new(0.5, 0.5, 0, 0)
-      alignement.add(button)
       
       vbox = Gtk::VBox.new
       vbox.add(label)
-      window.show_all
+      vbox.add(button)
+      
+      endwindow.add(vbox)
+      endwindow.show_all
     end
   end  
   
