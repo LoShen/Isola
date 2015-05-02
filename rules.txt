@@ -1,0 +1,19 @@
+Les règles du jeu :
+
+La position initiale des pions est laissée au choix des joueurs. 
+Les adversaires jouent à tour de rôle.
+Jouer consiste à effectuer les deux étapes suivantes :
+
+_ Déplacer son pion sur l’une des cases blanches voisines qui 
+n’est pas occupée par le pion adverse.
+Il n’est donc pas possible de se déplacer sur une case noire, 
+ni sur la case occupée par le pion
+adverse. 
+Un pion a donc au maximum 8 possibilités de déplacement.
+
+_ Interdire l’accès d’une case en y plaçant un carré noir. 
+Evidemment, il n’est possible de placer un carré noir 
+ni sur une case occupée par un pion, ni sur une case noire.
+Le premier joueur qui ne peut plus déplacer son pion - 
+c’est-à-dire qui se trouve sur une case qui ne touche plus aucune 
+case libre ni par un côté ni par un coin - perd la partie.
