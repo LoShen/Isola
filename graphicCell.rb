@@ -28,13 +28,28 @@ class GraphicCell < Gtk::HBox
     
     signal_connect('button_press_event') do # Comportement de la cellule au clic
       if $game.playersList[$game.current].pion.x == -1 # Si le joueur n'a pas encore placé son pion
+
+        #lorsque tous les joueurs ont places leur pion
+        if $game.current == $game.nbPlayers - 1
+
+          $order.set_text("Veuillez bouger votre pion") # On peut ordonner au premier joueur de deplacer son pion
+
+        end
+
         placerPion
+
       elsif $game.playersList[$game.current].bonusEnCours != 'None' # Si le joueur utilise un bonus
+
         jouerBonus
+
       else # Si le joueur se déplace ou noircit une case
+
         jouerEtape
+
       end
+
     end
+
   end
   
   def jouerBonus
@@ -45,29 +60,35 @@ class GraphicCell < Gtk::HBox
         blanchirCaseBonus($game.board[@x][@y])
         $game.playersList[$game.current].tableauBonus[0] = false
         #updateBonus
-        #else
-        # $ListeBonus.desactivate(0)
+=begin
+      else
+        $bonusList.desactivate(0)
       end
-      $game.playersList[$game.current].bonusEnCours = 'None'
+=end
+        $game.playersList[$game.current].bonusEnCours = 'None'
+      end
     when 'Noircir' then
       if $game.board[@x][@y].isAccessible
         noircirCase($game.board[@x][@y])
         $game.playersList[$game.current].tableauBonus[1] = false
-        #updateBonus
-        #else
-        # $ListeBonus.desactivate(1)
+      #   updateBonus
+      # else
+      #   $bonusList.desactivate(1)
+      # end
+        $game.playersList[$game.current].bonusEnCours = 'None'
       end
-      $game.playersList[$game.current].bonusEnCours = 'None'
     when 'Teleport' then
       if $game.board[@x][@y].isAccessible
         moveToken(@x, @y)
         $game.playersList[$game.current].tableauBonus[2] = false
-        #updateBonus
-        #else
-        # $ListeBonus.desactivate(2)
+      #  updateBonus
+      #else
+      #  $bonusList.desactivate(2)
+      #end
+        $game.playersList[$game.current].bonusEnCours = 'None'
       end
-      $game.playersList[$game.current].bonusEnCours = 'None'
     end
+    updateBonus
     updateBoard($game.board[@x][@y])
     endGameBonus
   end
@@ -77,25 +98,25 @@ class GraphicCell < Gtk::HBox
     x = $game.playersList[$game.current].pion.x
     y = $game.playersList[$game.current].pion.y
     cible = Cell.new(-1, -1)
-    #Si on a la TP
+    #Si on a la 'Teleportation'
     if $game.playersList[$game.current].tableauBonus[2] && $game.board[x][y].nbCasesLibresProches < 3
       cible = $game.board.bestCell
       if cible.value > $game.board[x][y].value
         moveToken(cible)
         $game.playersList[$game.current].tableauBonus[2] = false
-        #updateBonus
-        #else
-        # $ListeBonus.desactivate(2)
+        updateBonus
+      else
+        $bonusList.desactivate(2)
       end
-      #Si on a le blanchissement
+      #Si on a le 'blanchissement'
     elsif $game.playersList[$game.current].tableauBonus[0] && $game.board[x][y].nbCasesLibresProches < 3
       cible = $game.playersList[$game.current].pion.closestBlackCell
       if cible.x != -1
         blanchirCaseBonus(cible)
         $game.playersList[$game.current].tableauBonus[0] = false
-        #updateBonus
-        #else
-        # $ListeBonus.desactivate(2)
+        updateBonus
+      else
+        $bonusList.desactivate(0)
       end
       
       #Si on a le noircissement
@@ -107,6 +128,9 @@ class GraphicCell < Gtk::HBox
   end
 
   def jouerEtapeIA
+
+    updateBonus
+
     jouerBonusIA
     # Liste des actions lorsque l'IA joue son tour
     cible = $game.playersList[$game.current].pion.maxCaseProche
@@ -122,11 +146,15 @@ class GraphicCell < Gtk::HBox
   end
   
   def jouerEtape
+    
+    updateBonus
+
     # Liste des actions au tour classique d'un joueur (bouger le pion et noircir une case)
     case $game.playersList[$game.current].etape
     when 1 then # Si le joueur doit se déplacer
       if $game.board[@x][@y].isAccessible and $game.playersList[$game.current].pion.caseProche($game.board[@x][@y])
         # Si la case cliquée est libre et proche du pion du joueur
+        $order.set_text("Veuillez noircir une case") # On affiche la prochaine instruction 
         moveToken(@x, @y) # Le joueur déplace son pion
         recupBonus # Il récupère éventuellement un bonus
         updateBoard($game.board[@x][@y]) # L'affichage du plateau est mis à jour
@@ -134,10 +162,17 @@ class GraphicCell < Gtk::HBox
       end
     when 2 then # Si le joueur doit noircir une case
       if $game.board[@x][@y].isAccessible # Si cette case est libre
+        
+        $order.set_text("Veuillez bouger votre pion") # On affiche la prochaine instruction
         noircirCase($game.board[@x][@y]) # Elle est noircie
         nextStep # Le joueur passe à l'étape suivante
         endGamePopUp # On vérifie si le joueur a perdu
+#############################################################################
+        testBonus
+
+
         nextPlayer # On passe au joueur suivant
+
         if $game.playersList[$game.current].est_IA # Si le joueur suivant est une ia
           jouerEtapeIA # On déclenche son tour sans clic
         end
@@ -203,10 +238,15 @@ class GraphicCell < Gtk::HBox
   end
 
   def nextPlayer 
+
     # Passage au joueur suivant, bouclage de la liste
     $game.current += 1 # On passe au joueur suivant
     if $game.current == $game.nbPlayers then $game.current = 0 end 
     # Si le joueur est le dernier de la liste, on retourne au premier
+
+    $playerName.set_text($game.playersList[$game.current].pseudo.to_s)
+    $playerToken.set($game.playersList[$game.current].pion.image)
+
   end
 
   def nextStep 
@@ -235,42 +275,11 @@ class GraphicCell < Gtk::HBox
   end
   
   def endGameBonus
+    initializeBonus
     endGamePopUp
     nextPlayer
     endGamePopUp
     $game.current-=1
-  end
-
-
-  def endGamePopUp
-  # Si le joueur a perdu, on affiche un pop up qui informe que la partie est finie et renvoie au menu
-    if $game.playersList[$game.current-1].canPlay && !$game.playersList[$game.current].canPlay 
-		# Si le joueur précédent n'a pas déjà perdu et que le joueur actuel ne peut pas se déplacer, la partie prend fin
-			endwindow = Gtk::Window.new(Gtk::Window::POPUP)
-      endwindow.set_default_size(200, 150)
-      endwindow.set_window_position :center
-      
-      label = Gtk::Label.new($game.playersList[$game.current].pseudo.to_s+' a perdu !')
-      # On indique quel joueur a perdu la partie
-      
-      button = Gtk::Button.new('Revenir au menu')
-      button.set_size_request(180, 35)
-      button.signal_connect('button_press_event') do
-        $endOfProgramm = false
-        
-        endwindow.destroy
-        window.destroy
-        Gtk.main_quit
-        #main
-      end
-      
-      vbox = Gtk::VBox.new
-      vbox.add(label)
-      vbox.add(button)
-      
-      endwindow.add(vbox)
-      endwindow.show_all
-    end
   end  
   
 end

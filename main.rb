@@ -23,7 +23,6 @@ require './cell.rb'
 require './joueur.rb'
 require './board.rb'
 require './gameController.rb'
-tab = [2, 6, 6, "Selyah", "Oxedobra", false, true, './images/pion_j0.png','./images/pion_j1.png']
-$game = GameController.new(tab)
 require './graphicCell.rb'
+require './bonus.rb'
 require './inGame.rb'
