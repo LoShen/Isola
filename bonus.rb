@@ -23,24 +23,24 @@ class Bonus < Gtk::EventBox
 
         #charger l'image du bonus actif
         $game.playersList[$game.current].bonusEnCours = @name
+        @activate = !@activate
 
-      elsif $game.playersList[$game.current].bonusEnCours == 'None' then
+      elsif $game.playersList[$game.current].bonusEnCours == @name then
 
-          #charger l'image du bonus inactif
-          $game.playersList[$game.current].bonusEnCours = 'None'
+        #charger l'image du bonus inactif
+        $game.playersList[$game.current].bonusEnCours = 'None'
 
       end
       
       updateBonus
       
     end
-=begin
+
     def desactivate
 
       @activated = !@activated
 
     end
-=end
   end
 
 end

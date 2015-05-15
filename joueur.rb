@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
-# Time-stamp: <2015-04-22 17:49:41 oxedora>
+# -*- coding: utf-8 -*-
+# Time-stamp: <2015-05-15 14:03:10 oxedora>
 
 class Joueur
   attr_reader :pseudo
@@ -16,6 +17,10 @@ class Joueur
     @est_IA = b
     @tableauBonus = [false, false, false] # Pour chaque bonus, un booléen indique s'il est possédé par le joueur
     @bonusEnCours = 'None'
+  end
+
+  def afficheB
+    print "["+tableauBonus[0].to_s+" "+tableauBonus[1].to_s+" "+tableauBonus[2].to_s+"]\n"
   end
 
   def caseProche(c) #Explicite

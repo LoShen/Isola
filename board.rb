@@ -31,6 +31,16 @@ class Board
     
     init_CellValue # Initialisation de la pondération des cases
     if $bonus then alea_bonus end# Initialisation des bonus
+    
+    
+    #Affichage des bonus
+    for i in (0..@lines-1)
+      for j in (0..@columns-1)
+        print "["+@board[i][j].bonus.to_s+"] "
+      end
+      print "\n"
+    end
+
   end
 
   def [](i)
@@ -70,6 +80,7 @@ class Board
       c2-=1
       v+=2 # La pondération des cases augmente lorsqu'on se rapproche du centre
     end
+
   end
 
   def alea_bonus
@@ -87,11 +98,13 @@ class Board
     x = -1
     y = -1
     v = -100
-    @board.each do |cellule|
-      if cellule.value >= v
-        x = cellule.x
-        y = cellule.y
-        v = cellule.value
+    @board.each do |tabcellule|
+      tabcellule.each do |cellule|
+        if cellule.value >= v
+          x = cellule.x
+          y = cellule.y
+          v = cellule.value
+        end
       end
     end
     $game.board[x][y]

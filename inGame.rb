@@ -494,7 +494,7 @@ end
 
 def updateBonus
 
-  print 'UPDATE BONUS!!\n'
+  puts 'UPDATE BONUS!!'
 
   noBonus = true
   $allBox.show_all

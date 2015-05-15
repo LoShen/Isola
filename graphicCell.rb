@@ -27,27 +27,20 @@ class GraphicCell < Gtk::HBox
     add(@ebox) # N'affiche pas ebox en tant qu'élément graphique sinon
     
     signal_connect('button_press_event') do # Comportement de la cellule au clic
+      $game.playersList[$game.current].afficheB
       if $game.playersList[$game.current].pion.x == -1 # Si le joueur n'a pas encore placé son pion
-
         #lorsque tous les joueurs ont places leur pion
         if $game.current == $game.nbPlayers - 1
-
           $order.set_text("Veuillez bouger votre pion") # On peut ordonner au premier joueur de deplacer son pion
-
         end
-
         placerPion
-
       elsif $game.playersList[$game.current].bonusEnCours != 'None' # Si le joueur utilise un bonus
-
         jouerBonus
-
       else # Si le joueur se déplace ou noircit une case
-
         jouerEtape
-
       end
-
+      updateBonus
+      puts "Coordonnées de la meilleure case : x="+$game.board.bestCell.x.to_s+" y="+$game.board.bestCell.y.to_s
     end
 
   end
@@ -59,37 +52,35 @@ class GraphicCell < Gtk::HBox
       if $game.board[@x][@y].state == State::Black
         blanchirCaseBonus($game.board[@x][@y])
         $game.playersList[$game.current].tableauBonus[0] = false
-        #updateBonus
-=begin
+        updateBonus
       else
-        $bonusList.desactivate(0)
+        $bonusArray[0].desactivate
       end
-=end
-        $game.playersList[$game.current].bonusEnCours = 'None'
-      end
+
+      $game.playersList[$game.current].bonusEnCours = 'None'
+    
     when 'Noircir' then
       if $game.board[@x][@y].isAccessible
         noircirCase($game.board[@x][@y])
         $game.playersList[$game.current].tableauBonus[1] = false
-      #   updateBonus
-      # else
-      #   $bonusList.desactivate(1)
-      # end
-        $game.playersList[$game.current].bonusEnCours = 'None'
+        updateBonus
+      else
+        $bonusArray[1].desactivate
       end
+        $game.playersList[$game.current].bonusEnCours = 'None'
+          
     when 'Teleport' then
       if $game.board[@x][@y].isAccessible
         moveToken(@x, @y)
         $game.playersList[$game.current].tableauBonus[2] = false
-      #  updateBonus
-      #else
-      #  $bonusList.desactivate(2)
-      #end
-        $game.playersList[$game.current].bonusEnCours = 'None'
+        updateBonus
+        updateBoard($game.board[@x][@y])
+      else
+        $bonusArray[2].desactivate
       end
+      $game.playersList[$game.current].bonusEnCours = 'None'
     end
     updateBonus
-    updateBoard($game.board[@x][@y])
     endGameBonus
   end
 
@@ -100,30 +91,33 @@ class GraphicCell < Gtk::HBox
     cible = Cell.new(-1, -1)
     #Si on a la 'Teleportation'
     if $game.playersList[$game.current].tableauBonus[2] && $game.board[x][y].nbCasesLibresProches < 3
+      puts "nb cases libres = "+$game.board[x][y].nbCasesLibresProches.to_s
       cible = $game.board.bestCell
+      
       if cible.value > $game.board[x][y].value
-        moveToken(cible)
+        moveToken(cible.x, cible.y)
+        updateBoard(cible)
         $game.playersList[$game.current].tableauBonus[2] = false
         updateBonus
       else
-        $bonusList.desactivate(2)
+        $bonusArray[2].desactivate
       end
       #Si on a le 'blanchissement'
     elsif $game.playersList[$game.current].tableauBonus[0] && $game.board[x][y].nbCasesLibresProches < 3
+      print "nb cases libres = "+$game.board[x][y].nbCasesLibresProches.to_s
       cible = $game.playersList[$game.current].pion.closestBlackCell
       if cible.x != -1
         blanchirCaseBonus(cible)
         $game.playersList[$game.current].tableauBonus[0] = false
         updateBonus
       else
-        $bonusList.desactivate(0)
+        $bonusArray[0].desactivate
       end
       
       #Si on a le noircissement
     elsif $game.playersList[$game.current].tableauBonus[1]
       noircirCase($game.playersList[$game.current-1].pion.maxCaseProche)
     end
-    if cible.x != -1 then updateBoard(cible) end
     endGameBonus
   end
 
@@ -138,6 +132,7 @@ class GraphicCell < Gtk::HBox
     if ((0..$game.board.lines-1).include?(cible.x) && (0..$game.board.columns-1).include?(cible.y))
       # Si la cible est dans les limites du plateau
       moveToken(cible.x, cible.y) # L'ia déplace son pion
+      recupBonus
       updateBoard(cible) # Le plateau est mis à joue
       noircirCase($game.playersList[$game.current-1].pion.maxCaseProche) # L'ia noircit une case proche de son adversaire
       endGamePopUp # On vérifie si l'ia a perdu
@@ -194,10 +189,10 @@ class GraphicCell < Gtk::HBox
 
   def recupBonus
     # Place le bonus récupéré dans l'inventaire du joueur
-    if $game.board[@x][@y].bonus != 'None'
+    if $game.board[@x][@y].bonus != -1
       indice = $game.board[@x][@y].bonus # Chaque bonus correspond à un numéro
       $game.playersList[$game.current].tableauBonus[indice] = true # On place un booléen vrai à l'indice du tableau correspondant au bonus
-      $game.board[@x][@y].bonus = 'None' # Il n'y a plus de bonus sur cette case puisque le joueur l'a ramassé
+      $game.board[@x][@y].bonus = -1 # Il n'y a plus de bonus sur cette case puisque le joueur l'a ramassé
     end
   end
 
