@@ -41,6 +41,7 @@ class GraphicCell < Gtk::HBox
       end
       updateBonus
       puts "Coordonnées de la meilleure case : x="+$game.board.bestCell.x.to_s+" y="+$game.board.bestCell.y.to_s
+      updatePlayerInfo
     end
 
   end
@@ -238,10 +239,11 @@ class GraphicCell < Gtk::HBox
     $game.current += 1 # On passe au joueur suivant
     if $game.current == $game.nbPlayers then $game.current = 0 end 
     # Si le joueur est le dernier de la liste, on retourne au premier
-
+  end
+  
+  def updatePlayerInfo
     $playerName.set_text($game.playersList[$game.current].pseudo.to_s)
     $playerToken.set($game.playersList[$game.current].pion.image)
-
   end
 
   def nextStep 
