@@ -1,6 +1,9 @@
 #!/usr/bin/ruby
 # -*- coding: utf-8 -*-
 
+require './bonus.rb'
+require './tokenChoice.rb'
+
 Gtk.init
 
 # On initialise tous les elements necessaires a l'affichage et au commencement de la partie 
@@ -16,7 +19,7 @@ def main
   $endOfProgramm = true 
 
 
-  # Booleen distinguant : _ lorsque l'on clique sur la croix pour fermant la fenetre pour mettre fin au programme -> 'true'
+  # Booleen distingant : _ lorsque l'on clique sur la croix pour fermant la fenetre pour mettre fin au programme -> 'true'
   #                       _ lorque l'on ferme la fenetre en fin de partie pour en ouvrir une nouvelle (recommencer une partie) -> 'false'
 
   # Creation de la fenetre principale
@@ -39,9 +42,9 @@ def main
     
     # Si l'on souhaite definitivement quitter le programme -> 'true'
     if $endOfProgramm
- 
-        Gtk.main_quit # On quitte la boucle et le progamme s'arrete
-    
+      
+      Gtk.main_quit # On quitte la boucle et le progamme s'arrete
+      
     end
 
   end
@@ -55,7 +58,7 @@ def menu(gameInformations)
   
   #essayer d'adapter la taille de la fenetre selon l'affichage
   $window.set_default_size(350, 350)
- 
+  
   #Message de bienvenue du menu principal
   welcome = Gtk::Label.new("Bonjour! et bienvenue sur ISOLA!")
 
@@ -161,6 +164,9 @@ def sizeOfBoard(gameInformations)
   columnsBox.add(enterNumberOfColumns)
   columnsBox.add(columnsEntry)
 
+  #Message de prévention
+  prevLabel = Gtk::Label.new("Si vos dimensions sortent des limites autorisées\n\t elles seront réajustées automatiquement")
+
   buttonsBox = Gtk::HBox.new
 
   #bouton retour
@@ -182,7 +188,9 @@ def sizeOfBoard(gameInformations)
   
   $allBox.add(linesBox)
   $allBox.add(columnsBox)
+  $allBox.add(prevLabel)
   $allBox.add(buttonsBox)
+
 
   $allBox.show_all
 
@@ -191,6 +199,7 @@ def sizeOfBoard(gameInformations)
     # On supprime tous les elements de la boite principale
     $allBox.remove(linesBox)
     $allBox.remove(columnsBox)
+    $allBox.remove(prevLabel)
     $allBox.remove(buttonsBox)
 
     # On revient au menu principal
@@ -199,7 +208,21 @@ def sizeOfBoard(gameInformations)
   end
 
   continue.signal_connect "clicked" do
-
+    if linesEntry.text == nil || linesEntry.text.to_s.to_i < 6 
+      gameInformations[1] = 6 
+    elsif linesEntry.text.to_s.to_i > 10
+      gameInformations[1] = 10 
+    else
+      gameInformations[1] = linesEntry.text.to_s.to_i
+    end
+    if columnsEntry.text == nil || columnsEntry.text.to_s.to_i < 6 
+      gameInformations[2] = 6 
+    elsif columnsEntry.text.to_s.to_i > 10
+      gameInformations[2] = 10 
+    else
+      gameInformations[2] = columnsEntry.text.to_s.to_i
+    end
+"""
     # Si la saisie d'au moins une des valeurs(nombre de lignes et/ou nombre de colonnes) est incorrecte
     if linesEntry.text[0] == nil || columnsEntry.text[0] == nil || linesEntry.text.to_s.to_i < 6 || linesEntry.text.to_s.to_i > 10 || columnsEntry.text.to_s.to_i < 6 || columnsEntry.text.to_s.to_i > 10 
 
@@ -212,7 +235,7 @@ def sizeOfBoard(gameInformations)
       errorVBox = Gtk::VBox.new
 
       # Label contenant le message d'erreur
-      linesAndColumnsErrorValue = Gtk::Label.new("Navré! La valeur saisie est incorrect! veuillez recommencer")
+      linesAndColumnsErrorValue = Gtk::Label.new('Navré ! La valeur saisie est incorrecte ! Veuillez recommencer')
 
       # Le bouton permettant de faire disparaitre la fenetre pop up pour corriger la saisie
       ok = Gtk::Button.new('OK')
@@ -233,34 +256,35 @@ def sizeOfBoard(gameInformations)
       errorLinesAndColumnsPopup.show_all
 
       # En cliquant sur le bouton 'OK', la fenetre pop up se fermera
-      ok.signal_connect "clicked" do
+      ok.signal_connect 'clicked' do
 
         errorLinesAndColumnsPopup.destroy
 
       end
-    
-    else
-    # Sinon si la saisie des valeurs(lignes / colonnes) est bonne,     
+     
+    else"""
+      # Sinon si la saisie des valeurs(lignes / colonnes) est bonne,     
 
       # On stock les 2 valeurs sous forme d'entiers dans notre tableau d'unformations permettant de créer le jeu
-      gameInformations[1] = linesEntry.text.to_s.to_i
-      gameInformations[2] = columnsEntry.text.to_s.to_i
+      #gameInformations[1] = linesEntry.text.to_s.to_i
+      #gameInformations[2] = columnsEntry.text.to_s.to_i
 
       # On supprime tous les elements de la boite principale
-      $allBox.remove(linesBox)
-      $allBox.remove(columnsBox)
-      $allBox.remove(buttonsBox)
+    $allBox.remove(linesBox)
+    $allBox.remove(columnsBox)
+    $allBox.remove(prevLabel)
+    $allBox.remove(buttonsBox)
 
       # Puis l'on passe a la phase suivante le choix du mode(joueur / IA)
       gameKind(gameInformations)
 
-    end
+    #end
 
   end
 
 end
 
-# Choix du mode de jeu
+# Choix du mode de jeu (contre humain/IA, avec/sans bonus)
 def gameKind(gameInformations)
 
   playerVsPlayer = Gtk::RadioButton.new "JcJ (Joueur VS Joueur)" 
@@ -271,24 +295,31 @@ def gameKind(gameInformations)
   $allBox.add(playerVsPlayerAlignment)
 
 
-  playerVsIA = Gtk::RadioButton.new playerVsPlayer, "Joueur VS Intelligence artificielle"
+  playerVsIA = Gtk::RadioButton.new playerVsPlayer, "JcE (Joueur VS Intelligence artificielle)"
   
   playerVsIAAlignment = Gtk::Alignment.new(0.5, 0.5, 0, 0)
   playerVsIAAlignment.add(playerVsIA)
 
   $allBox.add(playerVsIAAlignment)
 
-# implementation du choix IA vs IA. Non implemente par manque de temps. 
+  bonusCheck = Gtk::CheckButton.new "Jouer avec bonus ?"
 
-=begin #IAvsIA
+  bonusCheckAlignment = Gtk::Alignment.new(0.5, 0.5, 0, 0)
+  bonusCheckAlignment.add(bonusCheck)
+
+  $allBox.add(bonusCheckAlignment)
+
+  # implementation du choix IA vs IA. Non implemente par manque de temps. 
+
+  ''' #IAvsIA
      iAVsIA = Gtk::RadioButton.new button2, "Intelligence artificielle VS Intelligence artificielle"
      
      iAVsIAAlignment = Gtk::Alignment.new(0.5, 0.5, 0, 0)
      iAVsIAAlignment.add(iAVsIA)
 
      gameKindBox.add(iAVsIAAlignment)
-=end #IAvsIA
-
+''' #IAvsIA
+  
   buttonPlayerHBox = Gtk::HBox.new
 
   #bouton retour
@@ -316,7 +347,8 @@ def gameKind(gameInformations)
 
     # On supprime tous les elements de notre boite principale
     $allBox.remove(playerVsPlayerAlignment)
-    $allBox.remove(button2Alignment)
+    $allBox.remove(playerVsIAAlignment)
+    $allBox.remove(bonusCheckAlignment)
     #IAvsIA gameKindBox.remove(iAVsIAAlignment)
     $allBox.remove(buttonPlayerHBox)
 
@@ -329,6 +361,7 @@ def gameKind(gameInformations)
 
     $allBox.remove(playerVsPlayerAlignment)
     $allBox.remove(playerVsIAAlignment)
+    $allBox.remove(bonusCheckAlignment)
     #IAvsIA gameKindBox.remove(iAVsIAAlignment)
     $allBox.remove(buttonPlayerHBox)
 
@@ -345,7 +378,7 @@ def gameKind(gameInformations)
       gameInformations[6] = true
       choosePlayerName(1, gameInformations)
 
-=begin #IAvsIA
+      ''' #IAvsIA
        else
          
          $gameInformations[5] = true
@@ -353,14 +386,14 @@ def gameKind(gameInformations)
          choosePlayerName(1, gameInformations)
 
        end
-=end #IAvsIA
+''' #IAvsIA
 
-    # les parties commentées ' #IAvsIA ' ne sont pas utiles si on implemente pas l'affrontement de deux IA (de preference avec une
-    # fonction "pas a pas" pour que l'utilisateur voie se derouler l'action au tour par tour 
+      # les parties commentées ' #IAvsIA ' ne sont pas utiles si on implemente pas l'affrontement de deux IA (de preference avec une
+      # fonction "pas a pas" pour que l'utilisateur voie se derouler l'action au tour par tour 
 
+    end
+    $bonus = bonusCheck.active? 
   end
-end
-
 end
 
 def choosePlayerName(countPlayerName, gameInformations)
@@ -406,9 +439,11 @@ def choosePlayerName(countPlayerName, gameInformations)
       choosePlayerName(countPlayerName, gameInformations)
 
     else
+    #sinon on passe a la phase de de selection des pions de chaque joueur
 
-      #sinon on passe a la phase de creation du jeu
-      createGame(gameInformations)
+      enablesTokensArray = [true, true, true, true, true, true]
+
+      chooseToken(1, gameInformations, enablesTokensArray)
 
     end
 
@@ -417,17 +452,117 @@ def choosePlayerName(countPlayerName, gameInformations)
 end
 
 #Chacun des joueurs va pouvoir choisir un pion (parmi ceux proposés)
-def chooseToken(gameInformations)
-
+def chooseToken(countPlayerName, gameInformations, enablesTokensArray)
   
+  chooseYourToken = Gtk::Label.new("#{gameInformations[countPlayerName + 2]} veuillez choisir votre pion")
+
+  # Creation des images des pions cliquables
+  token1 = TokenChoice.new('./images/pion1.png')
+  token2 = TokenChoice.new('./images/pion2.png')
+  token3 = TokenChoice.new('./images/pion3.png')
+  token4 = TokenChoice.new('./images/pion4.png')
+  token5 = TokenChoice.new('./images/pion5.png')
+  token6 = TokenChoice.new('./images/pion6.png')  
+
+  tokenHBox1 = Gtk::HBox.new
+  tokenHBox2 = Gtk::HBox.new
+
+  # Uniquement les pions disponibles seront affiches
+  if enablesTokensArray[0]
+      tokenHBox1.add(token1)
+  end
+
+  if enablesTokensArray[1]
+      tokenHBox1.add(token2)
+  end
+
+  if enablesTokensArray[2]
+      tokenHBox1.add(token3)
+  end
+
+  if enablesTokensArray[3]
+      tokenHBox2.add(token4)
+  end
+
+  if enablesTokensArray[4]
+      tokenHBox2.add(token5)
+  end
+
+  if enablesTokensArray[5]
+      tokenHBox2.add(token6)
+  end
+
+  $allBox.add(chooseYourToken)
+  $allBox.add(tokenHBox1)
+  $allBox.add(tokenHBox2)
+  
+  $allBox.show_all
+
+  token1.signal_connect "button_press_event" do
+
+    updateChooseToken(countPlayerName, gameInformations, enablesTokensArray, 0, token1, chooseYourToken, tokenHBox1, tokenHBox2)
+
+  end
+
+  token2.signal_connect "button_press_event" do
+
+    updateChooseToken(countPlayerName, gameInformations, enablesTokensArray, 1, token2, chooseYourToken, tokenHBox1, tokenHBox2)
+
+  end
+
+  token3.signal_connect "button_press_event" do
+
+    updateChooseToken(countPlayerName, gameInformations, enablesTokensArray, 2, token3, chooseYourToken, tokenHBox1, tokenHBox2)
+
+  end
+
+  token4.signal_connect "button_press_event" do
+
+    updateChooseToken(countPlayerName, gameInformations, enablesTokensArray, 3, token4, chooseYourToken, tokenHBox1, tokenHBox2)
+
+  end
+
+  token5.signal_connect "button_press_event" do
+
+    updateChooseToken(countPlayerName, gameInformations, enablesTokensArray, 4, token5, chooseYourToken, tokenHBox1, tokenHBox2)
+
+  end
+
+  token6.signal_connect "button_press_event" do
+
+    updateChooseToken(countPlayerName, gameInformations, enablesTokensArray, 5, token6, chooseYourToken, tokenHBox1, tokenHBox2)
+
+  end
+
+end
+
+# Met a jour la phase de selection du pion 
+def updateChooseToken(countPlayerName, gameInformations, enablesTokensArray, indice, token, chooseYourToken, tokenHBox1, tokenHBox2)
+
+  gameInformations[countPlayerName + 6] = token.picture_adress # On conserve l'adresse de l'image du pion choisi
+  
+  enablesTokensArray[indice] = false # Le pion n'est alors plus disponible pour le choix du prochain joueur
+
+  $allBox.remove(chooseYourToken)
+  $allBox.remove(tokenHBox1)
+  $allBox.remove(tokenHBox2)
+
+  countPlayerName += 1
+      
+  if countPlayerName <= gameInformations[0] # tant que tous les joueurs n'ont pas selectionne un pion, on passe au joueur suivant
+    
+    chooseToken(countPlayerName, gameInformations, enablesTokensArray)
+    
+  else # Sinon on passe a la phase de creation du jeu
+    
+    createGame(gameInformations)
+    
+  end
 
 end
 
 #Creation du jeu
 def createGame(gameInformations)
-
-  gameInformations[7] = './images/pion_j0.png'
-  gameInformations[8] = './images/pion_j1.png'
 
   # On cree le jeu avec les informations collectees au prealable
   $game = GameController.new(gameInformations)
@@ -446,9 +581,11 @@ def game(gameInformations)
   # On affichera sur trois lignes horizontales :
   $playerBox = Gtk::HBox.new # les informations concernant le joueur actuel
   $boardBox = Gtk::HBox.new  # l'etat du plateau de jeu
-  $bonusListState = Gtk::Label.new("Vous n'avez aucun bonus") # represente l'etat de la liste des bonus du joueur courant
-  $bonusBox = Gtk::HBox.new  # la liste des bonus du joueur actuel
 
+  if $bonus then
+    $bonusListState = Gtk::Label.new("Vous n'avez aucun bonus") # represente l'etat de la liste des bonus du joueur courant
+    $bonusBox = Gtk::HBox.new  # la liste des bonus du joueur actuel
+  end
   $playerName = Gtk::Label.new($game.playersList[$game.current].pseudo.to_s)
   $playerToken = Gtk::Image.new($game.playersList[$game.current].pion.image)
   $order = Gtk::Label.new("Veuillez placer votre pion")
@@ -473,87 +610,63 @@ def game(gameInformations)
   alignement.add(fixed)
 
   $boardBox.add(alignement)
-  
-  for i in 0..2
-  
-    $bonusBox.add($bonusArray[i])
-    
+  if $bonus then
+    for i in 0..2
+      $bonusBox.add($bonusArray[i])
+    end
   end
 
   $allBox.add($playerBox)
   $allBox.add($order)
   $allBox.add($boardBox)
-  $allBox.add($bonusListState)
-  $allBox.add($bonusBox)
-
+  if $bonus
+    $allBox.add($bonusListState)
+    $allBox.add($bonusBox)
+  end
   $allBox.show_all
-
-  $bonusBox.hide_all
-
+  if $bonus
+    $bonusBox.hide_all
+  end
 end
 
 def updateBonus
-
-  puts 'UPDATE BONUS!!'
-
-  noBonus = true
-  $allBox.show_all
-
-  for i in 0..2
-    
-    if $game.playersList[$game.current].tableauBonus[i] then
-
-      noBonus = false
-############################
-      puts $game.playersList[$game.current].tableauBonus[i]
-############################
-      $bonusArray[i].show
-
-    else
-     
-      $bonusArray[i].hide
- 
+  if $bonus then
+    #puts 'UPDATE BONUS!!'
+    noBonus = true
+    $allBox.show_all
+    for i in 0..2
+      if $game.playersList[$game.current].tableauBonus[i] then
+        noBonus = false
+        ###########################
+        puts $game.playersList[$game.current].tableauBonus[i]
+        ###########################
+        $bonusArray[i].show
+      else
+        $bonusArray[i].hide
+      end
     end
-
+    if noBonus then
+      $bonusListState.set_text("Vous n'avez aucun bonus")
+    else
+      $bonusListState.set_text("Voici votre liste de bonus")
+    end
   end
-
-  if noBonus then
-
-    $bonusListState.set_text("Vous n'avez aucun bonus")
-
-  else
-    
-    $bonusListState.set_text("Voici votre liste de bonus")
-
-  end
-
-end
-
-def testBonus
-
-  puts $game.playersList[$game.current].pseudo
-
-  for i in 0..2
-
-    puts $game.playersList[$game.current].tableauBonus[i]
-
-  end
-
 end
 
 def initializeBonus
-
-  for i in 0..2
-
-    $bonusArray[i].activated = false
-
+  if $bonus then
+    for i in 0..2
+      $bonusArray[i].activated = false
+    end
   end
- 
 end
 
 def endGamePopUp
   # Si le joueur a perdu, on affiche un pop up qui informe que la partie est finie et renvoie au menu
-  if $game.playersList[$game.current-1].canPlay && !$game.playersList[$game.current].canPlay 
+  puts "avant condi"
+  if $game.playersList[$game.current-1].canPlay && !$game.playersList[$game.current].canPlay || !$game.playersList[$game.current].canPlay
+
+    puts "apres condi"
     endWindow = Gtk::Window.new(Gtk::Window::POPUP)
     endWindow.set_default_size(200, 150)
     endWindow.set_window_position :center
@@ -572,23 +685,23 @@ def endGamePopUp
     vbox.add(endOfGameButtonAlignment)
     
     endWindow.add(vbox)
-  
+    
     endWindow.show_all
-  
+    
     # Lorsque l'on clique sur le bouton de fin de jeu
     endOfGameButton.signal_connect "clicked" do
-    
+      
       $endOfProgramm = false # On ne compte pas quitter definitivement le programme -> 'false'
-    
+      
       endWindow.destroy # On ferme la fenetre pop up de fin de partie
       $window.destroy   # On ferme la fenetre du plateau de jeu
-    
+      
       main # On revient au menu principal
-    
+      
     end
 
   end
-    
+  
 end  
 
 #affichage des regles du jeu

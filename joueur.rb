@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 # -*- coding: utf-8 -*-
-# Time-stamp: <2015-05-15 14:03:10 oxedora>
+# Time-stamp: <2015-05-18 15:29:43 oxedora>
 
 class Joueur
   attr_reader :pseudo
@@ -32,7 +32,7 @@ class Joueur
   end
 
   def canPlay
-    @pion.canMove
+    @tableauBonus[2] || @pion.canMove
   end
 
   def to_s #Explicite

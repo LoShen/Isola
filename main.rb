@@ -13,7 +13,7 @@ lance le jeu.
 Auteur : Celia Rouquairol
 Derniere modification : Mars 2015
 """
-$bonus = true
+
 # Le but ici c'est de reprendre l'idée de Jérémy et de charger tous les fichiers pour éviter d'avoir des inclusions trop profondes.
 # Il faut faire attention à l'ordre d'inclusion.
 require 'gtk2'
@@ -24,5 +24,4 @@ require './joueur.rb'
 require './board.rb'
 require './gameController.rb'
 require './graphicCell.rb'
-require './bonus.rb'
 require './inGame.rb'

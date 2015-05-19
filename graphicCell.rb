@@ -54,35 +54,36 @@ class GraphicCell < Gtk::HBox
         blanchirCaseBonus($game.board[@x][@y])
         $game.playersList[$game.current].tableauBonus[0] = false
         updateBonus
+        endGameBonus
       else
         $bonusArray[0].desactivate
       end
-
       $game.playersList[$game.current].bonusEnCours = 'None'
-    
+
     when 'Noircir' then
       if $game.board[@x][@y].isAccessible
         noircirCase($game.board[@x][@y])
         $game.playersList[$game.current].tableauBonus[1] = false
         updateBonus
+        endGameBonus
       else
         $bonusArray[1].desactivate
       end
-        $game.playersList[$game.current].bonusEnCours = 'None'
-          
+      $game.playersList[$game.current].bonusEnCours = 'None'
+
     when 'Teleport' then
       if $game.board[@x][@y].isAccessible
         moveToken(@x, @y)
         $game.playersList[$game.current].tableauBonus[2] = false
         updateBonus
         updateBoard($game.board[@x][@y])
+        endGameBonus
       else
         $bonusArray[2].desactivate
       end
       $game.playersList[$game.current].bonusEnCours = 'None'
     end
     updateBonus
-    endGameBonus
   end
 
   def jouerBonusIA
@@ -100,6 +101,7 @@ class GraphicCell < Gtk::HBox
         updateBoard(cible)
         $game.playersList[$game.current].tableauBonus[2] = false
         updateBonus
+        endGameBonus
       else
         $bonusArray[2].desactivate
       end
@@ -111,6 +113,7 @@ class GraphicCell < Gtk::HBox
         blanchirCaseBonus(cible)
         $game.playersList[$game.current].tableauBonus[0] = false
         updateBonus
+        endGameBonus
       else
         $bonusArray[0].desactivate
       end
@@ -118,14 +121,13 @@ class GraphicCell < Gtk::HBox
       #Si on a le noircissement
     elsif $game.playersList[$game.current].tableauBonus[1]
       noircirCase($game.playersList[$game.current-1].pion.maxCaseProche)
+      endGameBonus
     end
-    endGameBonus
   end
 
   def jouerEtapeIA
 
     updateBonus
-
     jouerBonusIA
     # Liste des actions lorsque l'IA joue son tour
     cible = $game.playersList[$game.current].pion.maxCaseProche
@@ -135,8 +137,9 @@ class GraphicCell < Gtk::HBox
       moveToken(cible.x, cible.y) # L'ia déplace son pion
       recupBonus
       updateBoard(cible) # Le plateau est mis à joue
+      endGamePopUp
       noircirCase($game.playersList[$game.current-1].pion.maxCaseProche) # L'ia noircit une case proche de son adversaire
-      endGamePopUp # On vérifie si l'ia a perdu
+      endGamePopUp
       nextPlayer # On passe au joueur suivant
     end
   end
@@ -162,10 +165,7 @@ class GraphicCell < Gtk::HBox
         $order.set_text("Veuillez bouger votre pion") # On affiche la prochaine instruction
         noircirCase($game.board[@x][@y]) # Elle est noircie
         nextStep # Le joueur passe à l'étape suivante
-        endGamePopUp # On vérifie si le joueur a perdu
-#############################################################################
-        testBonus
-
+        #endGamePopUp # On vérifie si le joueur a perdu
 
         nextPlayer # On passe au joueur suivant
 
@@ -274,9 +274,6 @@ class GraphicCell < Gtk::HBox
   def endGameBonus
     initializeBonus
     endGamePopUp
-    nextPlayer
-    endGamePopUp
-    $game.current-=1
   end  
   
 end
