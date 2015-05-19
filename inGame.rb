@@ -418,7 +418,7 @@ def choosePlayerName(countPlayerName, gameInformations)
   $allBox.add(okAlignment)
 
   $allBox.show_all
-  puts countPlayerName
+  #puts countPlayerName
   
   ok.signal_connect "clicked" do
 
@@ -637,9 +637,7 @@ def updateBonus
     for i in 0..2
       if $game.playersList[$game.current].tableauBonus[i] then
         noBonus = false
-        ###########################
-        puts $game.playersList[$game.current].tableauBonus[i]
-        ###########################
+        #puts $game.playersList[$game.current].tableauBonus[i]
         $bonusArray[i].show
       else
         $bonusArray[i].hide
@@ -663,10 +661,8 @@ end
 
 def endGamePopUp
   # Si le joueur a perdu, on affiche un pop up qui informe que la partie est finie et renvoie au menu
-  puts "avant condi"
   if $game.playersList[$game.current-1].canPlay && !$game.playersList[$game.current].canPlay || !$game.playersList[$game.current].canPlay
 
-    puts "apres condi"
     endWindow = Gtk::Window.new(Gtk::Window::POPUP)
     endWindow.set_default_size(200, 150)
     endWindow.set_window_position :center

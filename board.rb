@@ -34,13 +34,13 @@ class Board
     
     
     #Affichage des bonus
-    for i in (0..@lines-1)
+'''    for i in (0..@lines-1)
       for j in (0..@columns-1)
         print "["+@board[i][j].bonus.to_s+"] "
       end
       print "\n"
     end
-
+'''
   end
 
   def [](i)

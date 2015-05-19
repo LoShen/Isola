@@ -27,7 +27,7 @@ class GraphicCell < Gtk::HBox
     add(@ebox) # N'affiche pas ebox en tant qu'élément graphique sinon
     
     signal_connect('button_press_event') do # Comportement de la cellule au clic
-      $game.playersList[$game.current].afficheB
+      #$game.playersList[$game.current].afficheB
       if $game.playersList[$game.current].pion.x == -1 # Si le joueur n'a pas encore placé son pion
         #lorsque tous les joueurs ont places leur pion
         if $game.current == $game.nbPlayers - 1
@@ -40,7 +40,7 @@ class GraphicCell < Gtk::HBox
         jouerEtape
       end
       updateBonus
-      puts "Coordonnées de la meilleure case : x="+$game.board.bestCell.x.to_s+" y="+$game.board.bestCell.y.to_s
+      #puts "Coordonnées de la meilleure case : x="+$game.board.bestCell.x.to_s+" y="+$game.board.bestCell.y.to_s
       updatePlayerInfo
     end
 
@@ -93,7 +93,7 @@ class GraphicCell < Gtk::HBox
     cible = Cell.new(-1, -1)
     #Si on a la 'Teleportation'
     if $game.playersList[$game.current].tableauBonus[2] && $game.board[x][y].nbCasesLibresProches < 3
-      puts "nb cases libres = "+$game.board[x][y].nbCasesLibresProches.to_s
+      #puts "nb cases libres = "+$game.board[x][y].nbCasesLibresProches.to_s
       cible = $game.board.bestCell
       
       if cible.value > $game.board[x][y].value
@@ -107,7 +107,7 @@ class GraphicCell < Gtk::HBox
       end
       #Si on a le 'blanchissement'
     elsif $game.playersList[$game.current].tableauBonus[0] && $game.board[x][y].nbCasesLibresProches < 3
-      print "nb cases libres = "+$game.board[x][y].nbCasesLibresProches.to_s
+      #print "nb cases libres = "+$game.board[x][y].nbCasesLibresProches.to_s
       cible = $game.playersList[$game.current].pion.closestBlackCell
       if cible.x != -1
         blanchirCaseBonus(cible)
@@ -165,7 +165,7 @@ class GraphicCell < Gtk::HBox
         $order.set_text("Veuillez bouger votre pion") # On affiche la prochaine instruction
         noircirCase($game.board[@x][@y]) # Elle est noircie
         nextStep # Le joueur passe à l'étape suivante
-        #endGamePopUp # On vérifie si le joueur a perdu
+        endGamePopUp # On vérifie si le joueur a perdu
 
         nextPlayer # On passe au joueur suivant
 
